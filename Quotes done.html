@@ -1,0 +1,860 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Tổng Hợp Câu Trích Dẫn – Sidebar Phải & Nhiều Chủ Đề</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%); min-height: 100vh; display: flex; }
+    .main-container { display: flex; width: 100%; min-height: 100vh; }
+    /* Sidebar bên phải */
+    .sidebar { position: fixed; right: 0; top: 0; width: 300px; height: 100vh; background: white; box-shadow: -5px 0 15px rgba(0,0,0,0.1); padding: 20px; overflow-y: auto; z-index: 100; }
+    .content-area { flex: 1; padding: 20px; margin-right: 300px; }
+    .sidebar-header { text-align: center; margin-bottom: 20px; padding-bottom: 16px; border-bottom: 2px solid #e9ecef; }
+    .sidebar-header h3 { color: #2c3e50; font-size: 1.3em; margin-bottom: 6px; }
+    .sidebar-section { margin-bottom: 22px; }
+    .sidebar-section h4 { color: #495057; font-size: 0.9em; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid #e9ecef; }
+    .sidebar-btn { width: 100%; padding: 10px 12px; margin-top: 10px; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 14px; transition: all 0.3s ease; text-align: left; display: flex; align-items: center; gap: 10px; }
+    .sidebar-btn:hover { transform: translateX(-3px); box-shadow: -3px 3px 10px rgba(0,0,0,0.1); }
+    .sidebar-btn-primary { background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%); color: #2c3e50; }
+    .sidebar-btn-secondary { background: #b8c6db; color: #2c3e50; }
+    .sidebar-btn-success { background: #c8e6c9; color: #2e7d32; }
+    .sidebar-btn-warning { background: #ffe0b2; color: #e65100; }
+    .sidebar-btn-danger { background: #ffcdd2; color: #c62828; }
+    .sidebar-btn-info { background: #e1f5fe; color: #0277bd; }
+    .hidden-input { display: none; }
+    .stats-sidebar { background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%); border-radius: 10px; padding: 16px; margin-bottom: 18px; }
+    .stat-item { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; color: #2c3e50; }
+    .stat-item:last-child { margin-bottom: 0; }
+    .stat-label { font-size: 0.9em; font-weight: 500; }
+    .stat-number { font-size: 1.1em; font-weight: bold; }
+    label { display: block; font-weight: 600; color: #495057; font-size: 0.9em; margin-bottom: 5px; }
+    input, select, textarea { width: 100%; padding: 10px; border: 2px solid #e9ecef; border-radius: 8px; font-size: 14px; transition: all 0.3s ease; }
+    input:focus, select:focus, textarea:focus { outline: none; border-color: #a8edea; box-shadow: 0 0 0 3px rgba(168, 237, 234, 0.2); }
+    textarea { resize: vertical; min-height: 100px; }
+    /* Chips cho chủ đề đã chọn */
+    .chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
+    .chip { background: #f1f3f5; border: 1px solid #e9ecef; border-radius: 16px; padding: 4px 8px; font-size: 12px; display: inline-flex; align-items: center; gap: 6px; }
+    .chip button { border: none; background: transparent; cursor: pointer; font-weight: 700; color: #c62828; }
+    .add-cat-row { display: flex; gap: 8px; margin-top: 6px; }
+    .add-cat-row input { flex: 1; }
+    .mini { font-size: 12px; color: #6c757d; margin-top: 4px; }
+    /* Nội dung chính */
+    .container { width: 100%; background: white; border-radius: 15px; box-shadow: 0 20px 40px rgba(0,0,0,0.08); overflow: hidden; }
+    .header { background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%); color: #2c3e50; padding: 28px; text-align: center; }
+    .header h1 { font-size: 2.2em; margin-bottom: 8px; text-shadow: 1px 1px 2px rgba(0,0,0,0.1); }
+    .header p { font-size: 1.05em; opacity: 0.85; margin-bottom: 16px; }
+    /* Nút random trong header */
+    .header-actions { margin-top: 16px; }
+    .btn-random-header { background: rgba(255, 255, 255, 0.9); color: #2c3e50; border: none; padding: 12px 20px; border-radius: 25px; font-weight: 600; font-size: 14px; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+    .btn-random-header:hover { background: white; transform: translateY(-2px); box-shadow: 0 6px 16px rgba(0,0,0,0.15); }
+    .quotes-section { padding: 24px; }
+    .quotes-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+    .quotes-count { font-size: 1.05em; color: #6c757d; font-weight: 600; }
+    .quotes-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 18px; }
+    .quote-card { background: white; border: 1px solid #e9ecef; border-radius: 12px; padding: 18px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); transition: all 0.3s ease; position: relative; }
+    .quote-card:hover { transform: translateY(-5px); box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
+    .quote-text { font-size: 1.1em; line-height: 1.6; color: #2c3e50; margin-bottom: 12px; font-style: italic; }
+    .quote-meta { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; }
+    .quote-source { font-weight: 600; color: #5e72e4; }
+    .quote-category { background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%); color: #2c3e50; padding: 4px 10px; border-radius: 20px; font-size: 0.8em; font-weight: 600; display: inline-block; margin-right: 6px; }
+    .quote-actions { position: absolute; top: 10px; right: 10px; display: flex; gap: 5px; }
+    .btn-small { padding: 6px 10px; font-size: 12px; border-radius: 6px; border: none; cursor: pointer; font-weight: 600; transition: all 0.3s ease; }
+    .btn-small:hover { transform: translateY(-2px); }
+    .btn-primary-small { background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%); color: #2c3e50; }
+    .btn-danger-small { background: #ffcdd2; color: #c62828; }
+    .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); }
+    .modal-content { background-color: white; margin: 5% auto; padding: 24px; border-radius: 15px; width: 90%; max-width: 650px; max-height: 80vh; overflow-y: auto; }
+    .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; padding-bottom: 12px; border-bottom: 1px solid #e9ecef; }
+    .close { color: #aaa; font-size: 28px; font-weight: bold; cursor: pointer; line-height: 1; }
+    .close:hover { color: #000; }
+    .empty-state { text-align: center; padding: 60px 20px; color: #6c757d; }
+    .empty-state h3 { margin-bottom: 10px; font-size: 1.5em; }
+    .management-item { display: flex; justify-content: space-between; align-items: center; padding: 10px; border: 1px solid #e9ecef; border-radius: 8px; margin-bottom: 8px; background: #f8f9fa; }
+    .management-item span { font-weight: 500; color: #495057; }
+    .btn { padding: 8px 16px; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 12px; transition: all 0.3s ease; }
+    .btn-primary { background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%); color: #2c3e50; }
+    .btn-danger { background: #ffcdd2; color: #c62828; }
+    .btn:hover { transform: translateY(-2px); }
+    /* Mobile */
+    .mobile-menu-btn { position: fixed; top: 20px; right: 20px; z-index: 1002; background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%); color: #2c3e50; border: none; border-radius: 50%; width: 50px; height: 50px; font-size: 20px; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.15); display: none; }
+    .mobile-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; }
+    .mobile-overlay.show { display: block; }
+    @media (max-width: 820px) {
+      .content-area { margin-right: 0; padding: 10px; }
+      .sidebar { position: fixed; right: -320px; width: 300px; transition: right 0.3s ease; z-index: 1001; }
+      .sidebar.open { right: 0; }
+      .mobile-menu-btn.show { display: block; }
+      .quotes-grid { grid-template-columns: 1fr; }
+      .modal-content { width: 95%; margin: 10% auto; padding: 20px; }
+    }
+  </style>
+</head>
+<body>
+  <button class="mobile-menu-btn" id="mobileMenuBtn" onclick="toggleSidebar()" aria-label="Mở menu">☰</button>
+  <div class="mobile-overlay" id="mobileOverlay" onclick="closeSidebar()"></div>
+  <div class="main-container">
+    <!-- Nội dung bên trái -->
+    <div class="content-area">
+      <div class="container">
+        <div class="header">
+          <h1>📚 Tổng Hợp Câu Trích Dẫn</h1>
+          <p>Lưu trữ và quản lý những câu trích dẫn yêu thích của bạn</p>
+          <div class="header-actions">
+            <button class="btn-random-header" onclick="showRandomQuotes()">
+              <span>🎲</span> Hiển Thị Ngẫu Nhiên
+            </button>
+          </div>
+        </div>
+
+        <div class="quotes-section">
+          <div class="quotes-header">
+            <div class="quotes-count" id="quotesCount">Hiển thị 0 câu trích dẫn</div>
+          </div>
+          <div class="quotes-grid" id="quotesGrid">
+            <div class="empty-state">
+              <div style="font-size: 4em; margin-bottom: 20px;">📖</div>
+              <h3>Chưa có câu trích dẫn nào</h3>
+              <p>Hãy thêm câu trích dẫn đầu tiên của bạn!</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Sidebar phải -->
+    <div class="sidebar" id="sidebar">
+      <div class="sidebar-header">
+        <h3>🎛️ Bảng Điều Khiển</h3>
+        <p style="font-size: 0.8em; color: #6c757d;">Nhập & tìm kiếm trích dẫn</p>
+      </div>
+
+      <div class="stats-sidebar">
+        <div class="stat-item"><span class="stat-label">📝 Trích dẫn</span><span class="stat-number" id="totalQuotes">0</span></div>
+        <div class="stat-item"><span class="stat-label">🏷️ Chủ đề</span><span class="stat-number" id="totalCategories">0</span></div>
+        <div class="stat-item"><span class="stat-label">📖 Sách</span><span class="stat-number" id="totalBooks">0</span></div>
+      </div>
+
+      <!-- Nhập câu trích dẫn -->
+      <div class="sidebar-section">
+        <h4>Thêm Trích Dẫn</h4>
+        <div class="control-group">
+          <label for="sideQuoteText">Câu trích dẫn *</label>
+          <textarea id="sideQuoteText" placeholder="Nhập câu trích dẫn..." required></textarea>
+        </div>
+        <div class="control-group">
+          <label for="sideBookName">Tên sách</label>
+          <input type="text" id="sideBookName" placeholder="Nhập tên sách..." autocomplete="off" />
+        </div>
+        <div class="control-group">
+          <label>Chủ đề (nhiều chủ đề)</label>
+          <div class="add-cat-row">
+            <input type="text" id="sideCategoryInput" placeholder="Nhập 1 chủ đề rồi bấm + hoặc Enter" />
+            <button class="btn btn-primary" id="addSideCatBtn">+</button>
+          </div>
+          <div class="mini">Bạn có thể thêm nhiều chủ đề. Ví dụ: Triết học, Cuộc sống...</div>
+          <div class="chips" id="sideSelectedCats"></div>
+        </div>
+        <button class="sidebar-btn sidebar-btn-primary" onclick="addQuote()"><span>➕</span> Thêm Trích Dẫn</button>
+      </div>
+
+      <!-- Tìm kiếm & lọc -->
+      <div class="sidebar-section">
+        <h4>Tìm Kiếm & Lọc</h4>
+        <div class="control-group">
+          <label for="searchKeyword">Từ khóa</label>
+          <input type="text" id="searchKeyword" placeholder="Nhập từ khóa..." />
+        </div>
+        <div class="control-group">
+          <label for="filterCategories">Lọc theo chủ đề (chọn nhiều)</label>
+          <select id="filterCategories" multiple size="6"></select>
+        </div>
+        <div class="control-group">
+          <label for="filterBook">Lọc theo sách</label>
+          <select id="filterBook">
+            <option value="">Tất cả sách</option>
+          </select>
+        </div>
+        <button class="sidebar-btn sidebar-btn-primary" onclick="searchQuotes()"><span>🔍</span> Tìm Kiếm</button>
+        <button class="sidebar-btn sidebar-btn-success" onclick="showAllQuotes()"><span>📋</span> Hiển Thị Tất Cả</button>
+      </div>
+
+      <!-- Quản lý -->
+      <div class="sidebar-section">
+        <h4>Quản Lý</h4>
+        <button class="sidebar-btn sidebar-btn-warning" onclick="openManageCategoriesModal()"><span>🏷️</span> Quản Lý Chủ Đề</button>
+        <button class="sidebar-btn sidebar-btn-info" onclick="openManageBooksModal()"><span>📖</span> Quản Lý Sách</button>
+      </div>
+
+      <!-- Dữ liệu -->
+      <div class="sidebar-section">
+        <h4>Dữ Liệu</h4>
+        <!-- NHẬP XML -->
+        <input type="file" class="hidden-input" id="importXMLInput" accept=".xml" onchange="importXMLData(event)" />
+        <label for="importXMLInput" class="sidebar-btn sidebar-btn-secondary"><span>📁</span> Nhập XML</label>
+        <!-- XUẤT XML -->
+        <button class="sidebar-btn sidebar-btn-secondary" onclick="exportXMLData()"><span>💾</span> Xuất XML</button>
+        <!-- NHẬP TXT -->
+        <input type="file" class="hidden-input" id="importTXTInput" accept=".txt" onchange="importTXTData(event)" />
+        <label for="importTXTInput" class="sidebar-btn sidebar-btn-secondary"><span>📄</span> Nhập TXT</label>
+        <!-- XUẤT TXT -->
+        <button class="sidebar-btn sidebar-btn-secondary" onclick="exportTXTFullData()"><span>📄</span> Xuất TXT (Toàn bộ)</button>
+        <button class="sidebar-btn sidebar-btn-secondary" onclick="exportTXTData()"><span>📑</span> Xuất TXT (Hiển thị)</button>
+        <button class="sidebar-btn sidebar-btn-danger" onclick="clearAllData()"><span>🗑️</span> Xóa Tất Cả</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modals -->
+  <div id="manageCategoriesModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="catTitle">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 id="catTitle">🏷️ Quản Lý Chủ Đề</h2>
+        <span class="close" onclick="closeManageCategoriesModal()" aria-label="Đóng">&times;</span>
+      </div>
+      <div class="control-group" style="display:flex; gap:10px; align-items:flex-end;">
+        <div style="flex:1;">
+          <label for="newCategoryName">Tên chủ đề mới</label>
+          <input type="text" id="newCategoryName" placeholder="Nhập tên chủ đề..." />
+        </div>
+        <button class="btn btn-primary" onclick="addCategory()">➕ Thêm</button>
+      </div>
+      <div id="categoriesList"></div>
+    </div>
+  </div>
+
+  <div id="manageBooksModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="bookTitle">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 id="bookTitle">📖 Quản Lý Sách</h2>
+        <span class="close" onclick="closeManageBooksModal()" aria-label="Đóng">&times;</span>
+      </div>
+      <div class="control-group" style="display:flex; gap:10px; align-items:flex-end;">
+        <div style="flex:1;">
+          <label for="newBookName">Tên sách mới</label>
+          <input type="text" id="newBookName" placeholder="Nhập tên sách..." />
+        </div>
+        <button class="btn btn-primary" onclick="addBook()">➕ Thêm</button>
+      </div>
+      <div id="booksList"></div>
+    </div>
+  </div>
+
+  <div id="editQuoteModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="editTitle">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 id="editTitle">✏️ Chỉnh Sửa Trích Dẫn</h2>
+        <span class="close" onclick="closeEditQuoteModal()" aria-label="Đóng">&times;</span>
+      </div>
+      <div class="control-group">
+        <label for="editQuoteText">Câu trích dẫn *</label>
+        <textarea id="editQuoteText" required></textarea>
+      </div>
+      <div class="control-group">
+        <label for="editBookName">Tên sách</label>
+        <input type="text" id="editBookName" autocomplete="off" />
+      </div>
+      <div class="control-group">
+        <label for="editCategories">Chủ đề (nhiều, cách nhau dấu phẩy)</label>
+        <input type="text" id="editCategories" placeholder="Ví dụ: Triết học, Cuộc sống" />
+      </div>
+      <div style="display:flex; gap:10px; margin-top: 6px;">
+        <button class="btn btn-primary" onclick="saveEditQuote()">💾 Lưu</button>
+        <button class="btn btn-danger" onclick="closeEditQuoteModal()">❌ Hủy</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // -----------------------
+    // Data & State
+    // -----------------------
+    let quotes = [];
+    let categories = ['Triết học', 'Tình yêu', 'Cuộc sống', 'Thành công', 'Hạnh phúc', 'Học tập'];
+    let books = ['Không rõ'];
+    let currentEditingQuoteId = null;
+    let displayedQuotes = [];
+    // tạm giữ chủ đề đã chọn ở sidebar khi thêm mới
+    let sideSelectedCategories = [];
+
+    // -----------------------
+    // Utilities
+    // -----------------------
+    const normalizeVN = (s='') => s.toString().normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim().replace(/\\s+/g, ' ');
+    function canonicalize(value, list) {
+      const norm = normalizeVN(value);
+      const found = list.find(x => normalizeVN(x) === norm);
+      return found || (value ? value.trim() : '');
+    }
+    function addUnique(list, value) {
+      const norm = normalizeVN(value);
+      if (!value) return;
+      const idx = list.findIndex(x => normalizeVN(x) === norm);
+      if (idx === -1) list.push(value.trim());
+    }
+    function slugify(s){ return s.normalize('NFD').replace(/[\\u0300-\\u036f]/g,'').replace(/[^a-zA-Z0-9-_]+/g,'-').replace(/-+/g,'-').replace(/^-|-$|/g,'').toLowerCase(); }
+    function xmlEscape(s=''){ return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+    function debounce(func, wait){ let t; return (...args)=>{ clearTimeout(t); t = setTimeout(()=>func.apply(null,args), wait); }; }
+
+    // -----------------------
+    // Init
+    // -----------------------
+    document.addEventListener('DOMContentLoaded', function() {
+      loadData();
+      migrateOldQuotesIfNeeded();
+      updateStats();
+      updateFilters();
+      setupEventListeners();
+      setupMobileMenu();
+      renderSideSelectedCats();
+    });
+
+    // -----------------------
+    // Responsive Sidebar
+    // -----------------------
+    function setupMobileMenu() {
+      const mobileBtn = document.getElementById('mobileMenuBtn');
+      if (window.innerWidth <= 820) { mobileBtn.classList.add('show'); }
+      window.addEventListener('resize', function() {
+        if (window.innerWidth <= 820) { mobileBtn.classList.add('show'); } else { mobileBtn.classList.remove('show'); closeSidebar(); }
+      });
+    }
+    function toggleSidebar(){ document.getElementById('sidebar').classList.toggle('open'); document.getElementById('mobileOverlay').classList.toggle('show'); }
+    function closeSidebar(){ document.getElementById('sidebar').classList.remove('open'); document.getElementById('mobileOverlay').classList.remove('show'); }
+
+    // -----------------------
+    // Event Listeners
+    // -----------------------
+    function setupEventListeners(){
+      // tìm kiếm
+      document.getElementById('searchKeyword').addEventListener('input', debounce(searchQuotes, 300));
+      document.getElementById('filterBook').addEventListener('change', searchQuotes);
+      document.getElementById('filterCategories').addEventListener('change', searchQuotes);
+
+      // thêm nhanh với Ctrl+Enter
+      document.getElementById('sideQuoteText').addEventListener('keydown', function(e){ if (e.ctrlKey && e.key === 'Enter') addQuote(); });
+
+      // thêm 1 chủ đề chip
+      document.getElementById('addSideCatBtn').addEventListener('click', function(){
+        const val = (document.getElementById('sideCategoryInput').value || '').trim();
+        if (!val) return;
+        pushSideCategory(val);
+      });
+      document.getElementById('sideCategoryInput').addEventListener('keydown', function(e){
+        if (e.key === 'Enter'){ e.preventDefault(); const val = (this.value||'').trim(); if (val) pushSideCategory(val); }
+      });
+
+      // close modal ESC
+      document.addEventListener('keydown', (e)=>{ if(e.key==='Escape'){ closeEditQuoteModal(); closeManageBooksModal(); closeManageCategoriesModal(); }});
+    }
+
+    function pushSideCategory(val){
+      const exists = sideSelectedCategories.some(c => normalizeVN(c) === normalizeVN(val));
+      if (!exists){ sideSelectedCategories.push(val); addUnique(categories, val); updateFilters(); }
+      document.getElementById('sideCategoryInput').value='';
+      renderSideSelectedCats();
+    }
+    function removeSideCategory(idx){
+      sideSelectedCategories.splice(idx,1);
+      renderSideSelectedCats();
+    }
+    function renderSideSelectedCats(){
+      const wrap = document.getElementById('sideSelectedCats');
+      wrap.innerHTML = '';
+      sideSelectedCategories.forEach((c, i) => {
+        const div = document.createElement('div');
+        div.className = 'chip';
+        div.innerHTML = `<span>${c}</span><button title="Xóa" onclick="removeSideCategory(${i})">×</button>`;
+        wrap.appendChild(div);
+      });
+    }
+
+    // -----------------------
+    // CRUD Quotes
+    // -----------------------
+    function addQuote(){
+      const text = document.getElementById('sideQuoteText').value.trim();
+      let book = document.getElementById('sideBookName').value.trim();
+      if (!text){ alert('Vui lòng nhập câu trích dẫn!'); return; }
+
+      book = book || 'Không rõ';
+      // nếu người dùng chưa thêm chip nào, coi như "Chưa phân loại"
+      const cats = sideSelectedCategories.length ? [...sideSelectedCategories] : ['Chưa phân loại'];
+      // chuẩn hóa theo danh mục
+      const catsCanon = cats.map(c => canonicalize(c, categories) || c);
+      catsCanon.forEach(c => addUnique(categories, c));
+      book = canonicalize(book, books) || book;
+      addUnique(books, book);
+
+      const quote = { id: Date.now(), text, book, categories: catsCanon, createdAt: new Date().toISOString() };
+      quotes.push(quote);
+
+      saveData(); updateStats(); updateFilters(); clearForm(); showAllQuotes();
+      showNotification('✅ Đã thêm trích dẫn thành công!', 'success');
+      if (window.innerWidth <= 820) closeSidebar();
+    }
+
+    function clearForm(){
+      document.getElementById('sideQuoteText').value='';
+      document.getElementById('sideBookName').value='';
+      document.getElementById('sideCategoryInput').value='';
+      sideSelectedCategories = [];
+      renderSideSelectedCats();
+    }
+
+    function showAllQuotes(){ displayedQuotes = [...quotes]; renderQuotes(); if (window.innerWidth <= 820) closeSidebar(); }
+
+    function showRandomQuotes(){
+      if (!quotes.length){ showNotification('⚠️ Chưa có câu trích dẫn nào!', 'warning'); return; }
+      const shuffled = [...quotes].sort(()=> 0.5 - Math.random());
+      displayedQuotes = shuffled.slice(0, Math.min(100, shuffled.length));
+      renderQuotes();
+      showNotification(`🎲 Hiển thị ${displayedQuotes.length} câu trích dẫn ngẫu nhiên`, 'info');
+      if (window.innerWidth <= 820) closeSidebar();
+    }
+
+    function getSelectedCategoryFilters(){
+      const sel = document.getElementById('filterCategories');
+      return Array.from(sel.selectedOptions).map(o => o.value).filter(Boolean);
+    }
+
+    function searchQuotes(){
+      const keyword = normalizeVN(document.getElementById('searchKeyword').value.trim());
+      const bookFilter = document.getElementById('filterBook').value;
+      const selectedCats = getSelectedCategoryFilters();
+      let filtered = quotes;
+
+      if (keyword){
+        filtered = filtered.filter(q => {
+          const catStr = (q.categories||[]).join(' ');
+          return normalizeVN(q.text).includes(keyword)
+              || normalizeVN(q.book).includes(keyword)
+              || normalizeVN(catStr).includes(keyword);
+        });
+      }
+      if (selectedCats.length){
+        filtered = filtered.filter(q => (q.categories||[]).some(cat => selectedCats.includes(cat)));
+      }
+      if (bookFilter) filtered = filtered.filter(q => q.book === bookFilter);
+
+      displayedQuotes = filtered.slice(0, 200);
+      renderQuotes();
+      if (keyword || selectedCats.length || bookFilter) showNotification(`🔍 Tìm thấy ${displayedQuotes.length} kết quả`, 'info');
+      if (window.innerWidth <= 820) closeSidebar();
+    }
+
+    // -----------------------
+    // Render
+    // -----------------------
+    function renderQuotes(){
+      const grid = document.getElementById('quotesGrid');
+      const count = document.getElementById('quotesCount');
+
+      count.textContent = `Hiển thị ${displayedQuotes.length} câu trích dẫn`;
+
+      grid.innerHTML = '';
+      if (!displayedQuotes.length){
+        const empty = document.createElement('div'); empty.className='empty-state';
+        empty.innerHTML = '<div style="font-size:4em; margin-bottom:20px;">📖</div><h3>Không tìm thấy kết quả</h3><p>Thử thay đổi từ khóa tìm kiếm hoặc bộ lọc</p>';
+        grid.appendChild(empty); return;
+      }
+
+      displayedQuotes.forEach(quote => {
+        const card = document.createElement('div'); card.className = 'quote-card';
+        const actions = document.createElement('div'); actions.className = 'quote-actions';
+
+        const btnEdit = document.createElement('button'); btnEdit.className = 'btn-small btn-primary-small'; btnEdit.title = 'Chỉnh sửa'; btnEdit.textContent = '✏️';
+        btnEdit.addEventListener('click', ()=> editQuote(quote.id));
+
+        const btnDelete = document.createElement('button'); btnDelete.className = 'btn-small btn-danger-small'; btnDelete.title = 'Xóa'; btnDelete.textContent = '🗑️';
+        btnDelete.addEventListener('click', ()=> deleteQuote(quote.id));
+
+        actions.append(btnEdit, btnDelete);
+
+        const text = document.createElement('div'); text.className='quote-text'; text.textContent = `"${quote.text}"`;
+        const meta = document.createElement('div'); meta.className='quote-meta';
+        const source = document.createElement('div'); source.className='quote-source'; source.textContent = quote.book;
+
+        const catWrap = document.createElement('div');
+        (quote.categories||[]).forEach(cat => {
+          const c = document.createElement('span');
+          c.className = 'quote-category';
+          c.textContent = cat;
+          catWrap.appendChild(c);
+        });
+
+        meta.append(source, catWrap);
+        card.append(actions, text, meta);
+        grid.appendChild(card);
+      });
+    }
+
+    function editQuote(id){
+      const quote = quotes.find(q => q.id === id); if (!quote) return;
+      currentEditingQuoteId = id;
+      document.getElementById('editQuoteText').value = quote.text;
+      document.getElementById('editBookName').value = quote.book;
+      document.getElementById('editCategories').value = (quote.categories||[]).join(', ');
+      document.getElementById('editQuoteModal').style.display = 'block';
+      document.body.style.overflow = 'hidden';
+    }
+
+    function saveEditQuote(){
+      const text = document.getElementById('editQuoteText').value.trim();
+      let book = document.getElementById('editBookName').value.trim() || 'Không rõ';
+      const catsStr = document.getElementById('editCategories').value || '';
+      const cats = catsStr.split(',').map(s => s.trim()).filter(Boolean);
+      const catsCanon = (cats.length ? cats : ['Chưa phân loại']).map(c => canonicalize(c, categories) || c);
+
+      if (!text){ alert('Vui lòng nhập câu trích dẫn!'); return; }
+      const idx = quotes.findIndex(q => q.id === currentEditingQuoteId); if (idx === -1) return;
+
+      book = canonicalize(book, books) || book; addUnique(books, book);
+      catsCanon.forEach(c => addUnique(categories, c));
+
+      quotes[idx] = { ...quotes[idx], text, book, categories: catsCanon };
+      saveData(); updateStats(); updateFilters(); closeEditQuoteModal(); searchQuotes();
+      showNotification('✅ Đã cập nhật trích dẫn!', 'success');
+    }
+
+    function closeEditQuoteModal(){ document.getElementById('editQuoteModal').style.display = 'none'; document.body.style.overflow=''; currentEditingQuoteId = null; }
+
+    function deleteQuote(id){ if (!confirm('Bạn có chắc chắn muốn xóa câu trích dẫn này?')) return; quotes = quotes.filter(q => q.id !== id); displayedQuotes = displayedQuotes.filter(q => q.id !== id); saveData(); updateStats(); renderQuotes(); showNotification('🗑️ Đã xóa trích dẫn!', 'success'); }
+
+    // -----------------------
+    // Manage Categories
+    // -----------------------
+    function openManageCategoriesModal(){ document.getElementById('manageCategoriesModal').style.display='block'; document.body.style.overflow='hidden'; renderCategoriesList(); if (window.innerWidth<=820) closeSidebar(); }
+    function closeManageCategoriesModal(){ document.getElementById('manageCategoriesModal').style.display='none'; document.body.style.overflow=''; }
+
+    function addCategory(){
+      const name = (document.getElementById('newCategoryName').value || '').trim();
+      if (!name) { alert('Vui lòng nhập tên chủ đề!'); return; }
+      if (categories.some(c => normalizeVN(c) === normalizeVN(name))) { alert('Chủ đề này đã tồn tại!'); return; }
+      categories.push(name);
+      document.getElementById('newCategoryName').value='';
+      renderCategoriesList(); updateFilters(); saveData();
+      showNotification('✅ Đã thêm chủ đề mới!', 'success');
+    }
+
+    function renderCategoriesList(){
+      const list = document.getElementById('categoriesList');
+      list.innerHTML = '';
+      categories.forEach(cat => {
+        const item = document.createElement('div'); item.className = 'management-item';
+        const span = document.createElement('span'); span.textContent = cat;
+        const btn = document.createElement('button'); btn.className='btn btn-danger'; btn.textContent='🗑️'; btn.addEventListener('click', ()=> deleteCategory(cat));
+        item.append(span, btn); list.appendChild(item);
+      });
+    }
+
+    function deleteCategory(name){
+      if (!confirm(`Bạn có chắc chắn muốn xóa chủ đề "${name}"?`)) return;
+      categories = categories.filter(c => c !== name);
+      // loại bỏ chủ đề khỏi mọi quote
+      quotes = quotes.map(q => ({...q, categories: (q.categories||[]).filter(c => c !== name)}));
+      saveData();
+      renderCategoriesList(); updateFilters(); showAllQuotes();
+      showNotification('🗑️ Đã xóa chủ đề!', 'success');
+    }
+
+    // -----------------------
+    // Manage Books
+    // -----------------------
+    function openManageBooksModal(){ document.getElementById('manageBooksModal').style.display='block'; document.body.style.overflow='hidden'; renderBooksList(); if (window.innerWidth<=820) closeSidebar(); }
+    function closeManageBooksModal(){ document.getElementById('manageBooksModal').style.display='none'; document.body.style.overflow=''; }
+
+    function addBook(){
+      const name = (document.getElementById('newBookName').value || '').trim();
+      if (!name) { alert('Vui lòng nhập tên sách!'); return; }
+      if (books.some(b => normalizeVN(b) === normalizeVN(name))) { alert('Sách này đã tồn tại!'); return; }
+      books.push(name);
+      document.getElementById('newBookName').value='';
+      renderBooksList(); updateFilters(); saveData();
+      showNotification('✅ Đã thêm sách mới!', 'success');
+    }
+
+    function renderBooksList(){
+      const list = document.getElementById('booksList');
+      list.innerHTML = '';
+      books.forEach(book => {
+        const item = document.createElement('div'); item.className = 'management-item';
+        const span = document.createElement('span'); span.textContent = book;
+        const btn = document.createElement('button'); btn.className='btn btn-danger'; btn.textContent='🗑️'; btn.addEventListener('click', ()=> deleteBook(book));
+        item.append(span, btn); list.appendChild(item);
+      });
+    }
+
+    function deleteBook(name){ if (!confirm(`Bạn có chắc chắn muốn xóa sách "${name}"?`)) return; books = books.filter(b => b !== name); renderBooksList(); updateFilters(); saveData(); showNotification('🗑️ Đã xóa sách!', 'success'); }
+
+    // -----------------------
+    // Filters & Stats
+    // -----------------------
+    function updateFilters(){
+      // cập nhật danh sách chủ đề cho multi-select
+      const catSelect = document.getElementById('filterCategories');
+      const selectedBefore = Array.from(catSelect.selectedOptions).map(o => o.value);
+      catSelect.innerHTML = '';
+      categories.forEach(cat => {
+        const option = document.createElement('option');
+        option.value = cat; option.textContent = cat;
+        if (selectedBefore.includes(cat)) option.selected = true;
+        catSelect.appendChild(option);
+      });
+
+      // cập nhật sách
+      const bookSelect = document.getElementById('filterBook');
+      const currentBookValue = bookSelect.value; bookSelect.innerHTML = '<option value="">Tất cả sách</option>';
+      books.forEach(book => { const option = document.createElement('option'); option.value = book; option.textContent = book; if (book === currentBookValue) option.selected = true; bookSelect.appendChild(option); });
+    }
+
+    function updateStats(){
+      document.getElementById('totalQuotes').textContent = quotes.length;
+      document.getElementById('totalCategories').textContent = categories.length;
+      document.getElementById('totalBooks').textContent = books.length;
+    }
+
+    // -----------------------
+    // Export / Import XML (hỗ trợ nhiều chủ đề)
+    // -----------------------
+    function exportXMLData(){
+      try{
+        const xmlParts = [];
+        xmlParts.push(`<QuotesApp version="2.0" exportDate="${new Date().toISOString()}">`);
+        xmlParts.push(`<Quotes>`);
+        quotes.forEach(q => {
+          xmlParts.push(`<Quote id="${q.id}">`);
+          xmlParts.push(`<Text>${xmlEscape(q.text)}</Text>`);
+          xmlParts.push(`<Book>${xmlEscape(q.book)}</Book>`);
+          xmlParts.push(`<Categories>`);
+          (q.categories||['Chưa phân loại']).forEach(c => xmlParts.push(`<Category>${xmlEscape(c)}</Category>`));
+          xmlParts.push(`</Categories>`);
+          xmlParts.push(`<CreatedAt>${xmlEscape(q.createdAt || '')}</CreatedAt>`);
+          xmlParts.push(`</Quote>`);
+        });
+        xmlParts.push(`</Quotes>`);
+        xmlParts.push(`<CategoriesList>`);
+        categories.forEach(c => xmlParts.push(`<Category>${xmlEscape(c)}</Category>`));
+        xmlParts.push(`</CategoriesList>`);
+        xmlParts.push(`<Books>`);
+        books.forEach(b => xmlParts.push(`<Book>${xmlEscape(b)}</Book>`));
+        xmlParts.push(`</Books>`);
+        xmlParts.push(`</QuotesApp>`);
+
+        const xmlString = xmlParts.join('');
+        const blob = new Blob([xmlString], { type: 'application/xml;charset=utf-8' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a'); a.href = url; a.download = `${slugify('trich-dan-backup')}-${new Date().toISOString().slice(0,10)}.xml`;
+        document.body.appendChild(a); a.click(); document.body.removeChild(a);
+        setTimeout(()=> URL.revokeObjectURL(url), 200);
+        showNotification('💾 Đã xuất XML thành công!', 'success');
+        if (window.innerWidth <= 820) closeSidebar();
+      } catch(e){ console.error('Lỗi xuất XML:', e); showNotification('❌ Lỗi xuất XML: ' + e.message, 'error'); }
+    }
+
+    function importXMLData(event){
+      const file = event.target.files[0]; if (!file) return;
+      if (!file.name.toLowerCase().endsWith('.xml')) { alert('Vui lòng chọn file XML!'); event.target.value=''; return; }
+      const reader = new FileReader();
+      reader.onload = function(e){
+        try{
+          const xmlString = e.target.result;
+          const parser = new DOMParser(); const xmlDoc = parser.parseFromString(xmlString, 'application/xml');
+          const parseError = xmlDoc.querySelector('parsererror'); if (parseError) throw new Error('File XML không đúng định dạng');
+          const root = xmlDoc.querySelector('QuotesApp'); if (!root) throw new Error('File XML không đúng cấu trúc QuotesApp');
+
+          const newQuotes = [];
+          xmlDoc.querySelectorAll('Quotes > Quote').forEach(qEl => {
+            const id = parseInt(qEl.getAttribute('id')) || Date.now() + Math.random();
+            const text = qEl.querySelector('Text')?.textContent || '';
+            const book = qEl.querySelector('Book')?.textContent || 'Không rõ';
+            // hỗ trợ cả format cũ (<Category>) lẫn mới (<Categories><Category>..)
+            let cats = [];
+            const multiCats = qEl.querySelectorAll('Categories > Category');
+            if (multiCats.length){
+              multiCats.forEach(cEl => { const v = (cEl.textContent||'').trim(); if (v) cats.push(v); });
+            } else {
+              const catOld = qEl.querySelector('Category')?.textContent || 'Chưa phân loại';
+              if (catOld) cats = [catOld];
+            }
+            const createdAt = qEl.querySelector('CreatedAt')?.textContent || new Date().toISOString();
+            if (text) newQuotes.push({ id, text, book, categories: cats.length?cats:['Chưa phân loại'], createdAt });
+          });
+
+          // danh mục tổng thể
+          let newCategories = [];
+          const catsBlock = xmlDoc.querySelectorAll('CategoriesList > Category');
+          if (catsBlock.length){
+            catsBlock.forEach(cEl => { const val = (cEl.textContent || '').trim(); if (val && !newCategories.some(x => normalizeVN(x)===normalizeVN(val))) newCategories.push(val); });
+          } else {
+            // fallback theo format cũ
+            xmlDoc.querySelectorAll('Categories > Category').forEach(cEl => { const val = (cEl.textContent || '').trim(); if (val && !newCategories.some(x => normalizeVN(x)===normalizeVN(val))) newCategories.push(val); });
+          }
+          const newBooks = [];
+          xmlDoc.querySelectorAll('Books > Book').forEach(bEl => { const val = (bEl.textContent || '').trim(); if (val && !newBooks.some(x => normalizeVN(x)===normalizeVN(val))) newBooks.push(val); });
+
+          const confirmMessage = `Bạn có muốn thay thế dữ liệu hiện tại không?\n\nHiện tại: ${quotes.length} câu trích dẫn\nTừ file XML: ${newQuotes.length} câu trích dẫn\n\nLưu ý: Dữ liệu cũ sẽ bị ghi đè!`;
+          if (confirm(confirmMessage)){
+            // Chuẩn hóa book/category theo danh mục mới để tránh lệch tên
+            quotes = newQuotes.map(q=> ({
+              ...q,
+              book: canonicalize(q.book, newBooks) || q.book,
+              categories: (q.categories||[]).map(c => canonicalize(c, newCategories) || c)
+            }));
+            categories = newCategories.length ? newCategories : ['Triết học','Tình yêu','Cuộc sống','Thành công','Hạnh phúc','Học tập'];
+            books = newBooks.length ? newBooks : ['Không rõ'];
+            saveData(); updateStats(); updateFilters(); showAllQuotes();
+            showNotification(`📁 Đã nhập thành công ${quotes.length} câu trích dẫn từ XML!`, 'success');
+            if (window.innerWidth <= 820) closeSidebar();
+          }
+        } catch(e){ console.error('Lỗi đọc file XML:', e); alert('Lỗi đọc file XML: ' + e.message); }
+        event.target.value = '';
+      };
+      reader.onerror = function(){ alert('Lỗi đọc file!'); event.target.value = ''; };
+      reader.readAsText(file, 'UTF-8');
+    }
+
+    // -----------------------
+    // Export / Import TXT (hỗ trợ nhiều chủ đề)
+    // -----------------------
+    function exportTXTData(){
+      if (!displayedQuotes.length){ alert('Không có câu trích dẫn nào để xuất!'); return; }
+      try{
+        let content = `TỔNG HỢP CÂU TRÍCH DẪN\n`;
+        content += `Ngày xuất: ${new Date().toLocaleDateString('vi-VN')}\n`;
+        content += `Tổng số: ${displayedQuotes.length} câu trích dẫn\n`;
+        content += `${'='.repeat(50)}\n\n`;
+        content += displayedQuotes.map((q,i)=> `${i+1}. "${q.text}"\n   - ${q.book} (${(q.categories||[]).join(', ')})\n`).join('\n');
+        const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a'); a.href = url; a.download = `trich-dan-hien-thi-${new Date().toISOString().slice(0,10)}.txt`;
+        document.body.appendChild(a); a.click(); document.body.removeChild(a); setTimeout(()=> URL.revokeObjectURL(url), 200);
+        showNotification('📑 Đã xuất TXT (hiển thị) thành công!', 'success'); if (window.innerWidth <= 820) closeSidebar();
+      } catch(e){ console.error('Lỗi xuất TXT:', e); showNotification('❌ Lỗi xuất TXT: ' + e.message, 'error'); }
+    }
+
+    function exportTXTFullData(){
+      if (!quotes.length){ alert('Không có dữ liệu nào để xuất!'); return; }
+      try{
+        let content = `BACKUP TOÀN BỘ DỮ LIỆU TRÍCH DẪN\n`;
+        content += `Ngày xuất: ${new Date().toLocaleDateString('vi-VN')}\n`;
+        content += `Tổng số: ${quotes.length} câu trích dẫn, ${categories.length} chủ đề, ${books.length} sách\n`;
+        content += `${'='.repeat(60)}\n\n`;
+        content += `[Quotes]\n`;
+        quotes.forEach((q,i)=>{ content += `${i+1}|"\\${q.text.replace(/"/g,'\\"')}"|\${q.book}|\${(q.categories||[]).join(', ')}\n`; });
+        content += `\n[Categories]\n`; categories.forEach(c=> content += `${c}\n`);
+        content += `\n[Books]\n`; books.forEach(b=> content += `${b}\n`);
+        const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a'); a.href = url; a.download = `backup-toan-bo-${new Date().toISOString().slice(0,10)}.txt`;
+        document.body.appendChild(a); a.click(); document.body.removeChild(a); setTimeout(()=> URL.revokeObjectURL(url), 200);
+        showNotification('📄 Đã xuất TXT toàn bộ thành công!', 'success'); if (window.innerWidth <= 820) closeSidebar();
+      } catch(e){ console.error('Lỗi xuất TXT toàn bộ:', e); showNotification('❌ Lỗi xuất TXT toàn bộ: ' + e.message, 'error'); }
+    }
+
+    function importTXTData(event){
+      const file = event.target.files[0]; if (!file) return;
+      if (!file.name.toLowerCase().endsWith('.txt')){ alert('Vui lòng chọn file TXT đúng định dạng!'); event.target.value=''; return; }
+      const reader = new FileReader();
+      reader.onload = function(e){
+        try{
+          const lines = e.target.result.split(/\r?\n/);
+          let newQuotes = [], newCategories = [], newBooks = [], section = '';
+          lines.forEach(raw => {
+            let line = (raw||'').trim(); if (!line) return;
+            if (line.startsWith('[') && line.endsWith(']')){ section = line; return; }
+            if (section === '[Quotes]'){
+              const parts = line.split('|');
+              if (parts.length >= 4){
+                const text = parts[1].replace(/^"|"$/g,'').replace(/\\"/g,'"');
+                const book = parts[2];
+                const catStr = parts[3];
+                const cats = catStr.split(',').map(s => s.trim()).filter(Boolean);
+                if (text) newQuotes.push({ id: Date.now()+Math.random(), text, book, categories: cats.length?cats:['Chưa phân loại'], createdAt: new Date().toISOString() });
+              }
+            } else if (section === '[Categories]'){
+              if (line && !newCategories.some(x => normalizeVN(x)===normalizeVN(line))) newCategories.push(line);
+            } else if (section === '[Books]'){
+              if (line && !newBooks.some(x => normalizeVN(x)===normalizeVN(line))) newBooks.push(line);
+            }
+          });
+          const confirmMessage = `Bạn có muốn thay thế dữ liệu hiện tại bằng dữ liệu từ file TXT?\n\nHiện tại: ${quotes.length} trích dẫn, ${categories.length} chủ đề, ${books.length} sách\nTừ file TXT: ${newQuotes.length} trích dẫn, ${newCategories.length} chủ đề, ${newBooks.length} sách\n\nLưu ý: Dữ liệu cũ sẽ bị ghi đè!`;
+          if (confirm(confirmMessage)){
+            quotes = newQuotes.map(q=> ({ ...q, book: canonicalize(q.book, newBooks)||q.book, categories: (q.categories||[]).map(c => canonicalize(c, newCategories)||c) }));
+            categories = newCategories.length ? newCategories : ['Triết học','Tình yêu','Cuộc sống','Thành công','Hạnh phúc','Học tập'];
+            books = newBooks.length ? newBooks : ['Không rõ'];
+            saveData(); updateStats(); updateFilters(); showAllQuotes();
+            showNotification(`📁 Đã nhập thành công ${quotes.length} câu trích dẫn từ TXT!`, 'success');
+            if (window.innerWidth <= 820) closeSidebar();
+          }
+        } catch(e){ console.error('Lỗi đọc file TXT:', e); alert('Lỗi đọc file TXT: ' + e.message); }
+        event.target.value = '';
+      };
+      reader.onerror = function(){ alert('Lỗi đọc file!'); event.target.value=''; };
+      reader.readAsText(file, 'UTF-8');
+    }
+
+    // -----------------------
+    // Storage
+    // -----------------------
+    function saveData(){
+      try{
+        localStorage.setItem('quotesApp_quotes', JSON.stringify(quotes));
+        localStorage.setItem('quotesApp_categories', JSON.stringify(categories));
+        localStorage.setItem('quotesApp_books', JSON.stringify(books));
+        localStorage.setItem('quotesApp_lastSave', new Date().toISOString());
+      } catch(e){ console.error('Lỗi lưu dữ liệu:', e); showNotification('❌ Lỗi lưu dữ liệu: ' + e.message, 'error'); }
+    }
+
+    function loadData(){
+      try{
+        const savedQuotes = localStorage.getItem('quotesApp_quotes');
+        const savedCategories = localStorage.getItem('quotesApp_categories');
+        const savedBooks = localStorage.getItem('quotesApp_books');
+        if (savedQuotes){ const parsed = JSON.parse(savedQuotes); if (Array.isArray(parsed)) quotes = parsed; }
+        if (savedCategories){ const parsed = JSON.parse(savedCategories); if (Array.isArray(parsed)) categories = parsed; }
+        if (savedBooks){ const parsed = JSON.parse(savedBooks); if (Array.isArray(parsed)) books = parsed; }
+        showAllQuotes();
+      } catch(e){ console.error('Lỗi tải dữ liệu:', e); showNotification('⚠️ Lỗi tải dữ liệu đã lưu', 'warning'); }
+    }
+
+    // chuyển đổi dữ liệu cũ (quote.category -> quote.categories[])
+    function migrateOldQuotesIfNeeded(){
+      let changed = false;
+      quotes = quotes.map(q => {
+        if (q && !q.categories){
+          const cat = q.category || 'Chưa phân loại';
+          changed = true;
+          const rest = {...q}; delete rest.category;
+          return { ...rest, categories: [cat] };
+        }
+        return q;
+      });
+      if (changed) saveData();
+    }
+
+    // -----------------------
+    // Clear all
+    // -----------------------
+    function clearAllData(){
+      if (!confirm('Bạn có chắc chắn muốn xóa TẤT CẢ dữ liệu?')) return;
+      quotes = []; categories = ['Triết học', 'Tình yêu', 'Cuộc sống', 'Thành công', 'Hạnh phúc', 'Học tập']; books = ['Không rõ'];
+      saveData(); updateStats(); updateFilters(); showAllQuotes();
+      showNotification('🗑️ Đã xóa toàn bộ dữ liệu!', 'success');
+    }
+
+    // -----------------------
+    // Notifications
+    // -----------------------
+    function showNotification(message, type='info'){
+      const n = document.createElement('div');
+      n.style.cssText = `position: fixed; top: 20px; left: 50%; transform: translateX(-50%); padding: 12px 16px; border-radius: 8px; color: white; font-weight: 600; z-index: 10000; max-width: 420px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); opacity: 0; transition: opacity 0.3s ease;`;
+      const colors = { success: '#c8e6c9', error: '#ffcdd2', warning: '#ffe0b2', info: '#e1f5fe' };
+      const textColors = { success: '#2e7d32', error: '#c62828', warning: '#e65100', info: '#0277bd' };
+      n.style.backgroundColor = colors[type] || colors.info; n.style.color = textColors[type] || textColors.info; n.textContent = message;
+      document.body.appendChild(n); setTimeout(()=> n.style.opacity='1', 10); setTimeout(()=> { n.style.opacity='0'; setTimeout(()=> n.remove(), 300); }, 2500);
+    }
+  </script>
+</body>
+</html>
